@@ -5,8 +5,8 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = S3_bucket_name
+    bucket = "jiwonly-bucket"
     key = "terraform.tfstate"
-    region = S3_region
+    region = "ap-northeast-2"
   }
 }

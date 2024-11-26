@@ -4,4 +4,6 @@ variable "S3_bucket_name" {
 
 variable "S3_region" {
     type = string
+    description = "The region for provider"
+    default     = "ap-northeast-2"
 }
