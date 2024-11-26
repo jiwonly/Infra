@@ -1,6 +1,6 @@
 # provider 지정
 provider "aws" {
-  region = S3_region
+  region = "ap-northeast-2"
 }
 
 terraform {
