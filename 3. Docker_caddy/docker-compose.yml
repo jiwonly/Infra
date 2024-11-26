@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  caddy:
+    image: caddy:latest
+    container_name: my-caddy
+    ports:
+      - "80:80"
+    volumes:
+      - ./index.html:/usr/share/caddy/html/index.html
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    depends_on:
+      - express1
+      - express2
+
+  express1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-express-1
+    expose:
+      - "3000:3000"
+    volumes:
+      - ./express1:/usr/src/app
+
+  express2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-express-2
+    expose:
+      - "3000:3000"
+    volumes:
+      - ./express2:/usr/src/app

@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  nginx:
+    image: nginx:latest
+    container_name: my-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./index.html:/usr/share/nginx/html/index.html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - express1
+      - express2
+
+  express1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-express-1
+    expose:
+      - "3000:3000"
+    volumes:
+      - ./express1:/app
+
+  express2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-express-2
+    expose:
+      - "3000:3000"
+    volumes:
+      - ./express2:/app
+
+    # ports는 외부로 포트를 노출하지만,
+    # expose는 컨테이너 간 통신에만 사용 (내부 통신)

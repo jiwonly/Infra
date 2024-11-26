@@ -1,0 +1,90 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+# S3
+
+jobs:
+  aws-s3-sync:
+    name: AWS S3 Sync
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # AWS 인증
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_NAME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync files to S3
+        run: aws s3 sync ./S3upload s3://${{ secrets.AWS_S3_BUCKET_NAME }} --acl public-read --delete
+
+  update-ecs:
+    name: Update ECS
+    runs-on: ubuntu-latest
+    needs: aws-s3-sync
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_NAME}}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./4. Docker
+          push: true
+          tags: ${{ secrets.AWS_ECR_REPOSITORY_URI }}:latest
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs:
+      - aws-s3-sync
+      - update-ecs
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_NAME}}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.2
+
+      - name: Terraform Init
+        working-directory: ./5. Terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ./5. Terraform
+        run: terraform apply -auto-approve

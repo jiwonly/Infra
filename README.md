@@ -1,2 +1,2 @@
-# Infra
-study docker, AWS, terraform, github actions
+# Study_Infra
+infra
