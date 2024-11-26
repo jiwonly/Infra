@@ -23,10 +23,10 @@ jobs:
 
       # CodeQL 초기화, 분석 언어 설정
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v2
         with:
           languages: javascript
 
       # CodeQL 분석 수행, 코드 취약점 확인
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v2
