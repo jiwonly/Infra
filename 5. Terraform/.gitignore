@@ -1,4 +1,3 @@
-main.tf
-*.tf
+
 *.tfstate
-# 
+*.tfvars
